@@ -1,0 +1,146 @@
+---
+layout: post
+title: SYMCLI Singles
+date: 2014-10-17 20:41:07.000000000 -04:00
+categories:
+- Automation
+- SYMCLI
+- Symmetrix
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+author:
+  login: scummins
+  email: sean@scummins.com
+  display_name: Sean Cummins
+  first_name: Sean
+  last_name: Cummins
+---
+<p>This post is simply a collection of UNIX/Linux shell one-liners for SYMCLI. Well, I guess they're not all one-liners, but they're all pretty brief -- to be pasted into a shell rather than executed from a file. I'll often share individual code snippets with people on an ad hoc basis, but I figured it would be more useful to just share everything in one post.</p>
+<p>I typically run these in <a href="http://blog.scummins.com/?p=56">SYMCLI offline mode</a> from a CentOS-based Docker container running in an Ubuntu VM, which in turn runs in VMware Fusion on my Mac. If there's any interest, I can put together a post with some info on the whole 'Dockerized Solutions Enabler' thing (all of this is totally unsupported, BTW -- hence the 'offline mode' bit).</p>
+<p>These examples use environment variables in place of specific object names, so you can either set your environment variables accordingly and then copy/paste the code, or you can manually replace the variables with explicit object names.</p>
+<p>For example:</p>
+<pre><code class="language-bash">export SID=1234
+export POOL=EFD
+export DEV=1CA3
+export SG=ESX_Storage_Group
+</code></pre>
+<p>Please note that these examples generally apply to the VMAX and VMAX2 product family, which primarily refers to the VMAX 10k, 20k, and 40k models. I'll call out exceptions to this as needed.</p>
+<p>Have a SYMCLI one-liner to share? Need help with a one-liner? Find a bug in one of mine? Drop me an email, or stop by the comment section below.</p>
+<p>This software is provided under the <a href="http://opensource.org/licenses/MIT">MIT License</a> "AS IS", without warranty of any kind.</p>
+<p><a name="regex"></a></p>
+<h1>Regular Expressions</h1>
+<p>Regular expressions that work well with SYMCLI output.</p>
+<p><a name="regex_devices"></a></p>
+<h3>Matching Device Names</h3>
+<p>For VMAX<sup>3,</sup> replace <code>\{4\}</code> with <code>\{5\}</code> -- as VMAX<sup>3</sup> uses 5-character device names.</p>
+<p>SymDev ID in first column: <code>"^[0-9a-fA-F]\{4\}\b"</code></p>
+<p>SymDev ID with optional leading spaces: <code>"^\s*[0-9a-fA-F]\{4\}\b"</code></p>
+<p><img src="assets/ss_regex_devmatch.png" alt="screenshot1" /></p>
+<p><a name="regex_match_sg"></a></p>
+<h3>Matching Storage Group Types</h3>
+<p>To show just parent SGs: <code>symsg -sid $SID list |grep -e "[\.X][\.X][P][\.DSB]"</code></p>
+<p>To show just child SGs: <code>symsg -sid $SID list |grep -e "[\.X][\.X][C][\.DSB]"</code></p>
+<p>To show non-cascaded SGs: <code>symsg –sid $SID list |grep -e "[\.X][\.X][\.][\.DSB]"</code></p>
+<p>To show cascaded SGs: <code>symsg -sid xxx $SID |grep -e "[\.X][\.X][CP][\.DSB]"</code></p>
+<p><img src="assets/ss_regex_sgmatch.png" alt="screenshot1" /></p>
+<p><a name="regex_wwn_transform"></a></p>
+<h3>Add colons to WWNs</h3>
+<p>To covert between, say, SYMCLI's and Brocade's WWN formats.</p>
+<p>I'd imagine there's a better way to do this, but it's beyond my regex capabilties at this point :) This should work with anything that outputs WWNs without colons; I just happen to be using a symaccess command in the example below.</p>
+<pre><code class="language-bash">symaccess -sid $SID list devinfo | \
+sed -e 's/\b\([0-9a-f]\{2\}\)\([0-9a-f]\{2\}\)\([0-9a-f]\{2\}\)\([0-9a-f]\{2\}\)\([0-9a-f]\{2\}\)\([0-9a-f]\{2\}\)\([0-9a-f]\{2\}\)\([0-9a-f]\{2\}\)\b/:::::::/ig'
+</code></pre>
+<p><img src="assets/ss_regex_wwn_transform.png" alt="screenshot" /></p>
+<p><a name="reports"></a></p>
+<h1>Reports</h1>
+<p><a name="report1"></a></p>
+<h3>Storage Group Membership Report</h3>
+<p>Produces a report with one row per Storage Group, showing all members of each Storage Group.</p>
+<p>First, ensure that Full Storage Group names are being used:</p>
+<p><code>export SYMCLI_FULL_NAME=1</code></p>
+<h4>Option 1: Full CSV</h4>
+<p>So you can import into Excel and split rows into columns on comma delimeters. Both the SG name and all devices will then end up in separate cells.</p>
+<pre><code class="language-bash">for sg in `symsg -sid $SID list |egrep "0$" |awk {'print $1'}`; do
+   echo -n $sg
+   for dev in `symsg -sid $SID show $sg \
+      | grep -e "^\s*[0-9a-fA-F]\{4\}\b" | awk {'print $1'}`; do
+         echo -n ', '; echo -n $dev; done; echo; done
+</code></pre>
+<p><img src="assets/ss_rpt_sg_membership_csv.png" alt="screenshot1" /></p>
+<h4>Option 2: SG Delimited with a hash (#)</h4>
+<p>So you can import into Excel and split rows into columns on hash delimeters. In this case, the SG name will be in the first column, and the complete device list (comma separated) will be in the second column.</p>
+<pre><code>for sg in `symsg -sid $SID list |egrep "0$" |awk {'print $1'}`; do
+   echo -n $sg; echo -n '#'; for dev in `symsg -sid $SID show $sg \
+   |grep -e "^\s*[0-9a-fA-F]\{4\}\b" |awk {'print $1'}`; do \
+      echo -n $dev; echo -n ', '; done; echo; done
+</code></pre>
+<p><img src="assets/ss_rpt_sg_membership_hash.png" alt="screenshot1" /></p>
+<p><a name="report2"></a></p>
+<h3>Show devices that are not in Storage Groups</h3>
+<pre><code>diff &lt;(symsg -sid $SID list -v | grep -e "^\s*[0-9a-fA-F]\{4\}\b" \
+   | awk {'print $1'} |sort -u) &lt;(symdev -sid $SID list -nomember \
+   | grep -e "^\s*[0-9a-fA-F]\{4\}\b" | awk {'print $1'} |sort -u)
+</code></pre>
+<p><img src="assets/ss_rpt_nosg.png" alt="screenshot1" /></p>
+<p><a name="report3"></a></p>
+<h3>Show FA mappings for a particular Storage Group</h3>
+<pre><code>for dev in `symsg -sid $SID show $SG |grep -e "^\s*[0-9a-fA-F]\{4\}\b" \
+   | awk {'print $1'}`; do
+      symdev -sid $SID list -dev $dev -multiport \
+      |grep -Eow "\b([0-9]{2}[E-H]:[0-1])\b"; done \
+| sort -u
+</code></pre>
+<p><img src="assets/ss_rpt_fa_mappings.png" alt="screenshot1" /></p>
+<p><a name="report4"></a></p>
+<h3>Show TDAT variance for all pools in an array</h3>
+<pre><code>POOLS=($(symcfg -sid $SID list -thin -pool \
+   | grep -e " T[SFEM][FA89][EDNS][EDB][IXM] " |awk {'print $1'}))
+
+for POOL in $POOLS; do
+   echo "--- POOL ${POOL} ---"
+   for i in `symcfg -sid $SID show \
+      -thin -pool $POOL | grep -e "\s[0-9A-F]\{4\}\s" \
+      | awk {'print $5'} | sort -u`; do \
+         echo -ne "${POOL}, #TDATs at ${i}% full: "; symcfg -sid $SID \
+            show -thin -pool $POOL | grep -e "\s[0-9A-F]\{4\}\s" \
+            | awk {'print $5'} | grep $i | wc -l
+            done; done
+
+</code></pre>
+<p><img src="assets/ss_rpt_tdat_variance.png" alt="screenshot1" /></p>
+<p><a name="report5"></a></p>
+<h3>Show TDEVs that are not under FAST VP control</h3>
+<pre><code>diff &lt;(symdev -sid $SID list -fast | grep TDEV | awk {'print $1'} \
+   | sort) &lt;(symdev -sid ${SID} list -tdev -nomember | grep TDEV \
+   | awk {'print $1'} | sort)
+</code></pre>
+<p><img src="assets/ss_rpt_fastless_tdevs.png" alt="screenshot1" /></p>
+<p><a name="xml"></a></p>
+<h1>XML One-Liners</h1>
+<p>The examples in this section all use <a href="http://blog.scummins.com/?p=68">SYMCLI's XML output</a>. All code snippets require xmllint, which is included in the libxml2 package. It's probably already installed by default on your Linux distro; but if not, you can run <code>sudo [yum/zypper] install libxml2</code> to install it.</p>
+<p>One annoying aspect about xmllint is the way it formats its output (wonky delimeters, which you could fix up with sed). A better alternative (IMHO) is <a href="http://xmlstar.sourceforge.net">xmlstarlet</a>, but this is not installed by default on most Linux distros, and appears to have been dropped from Fedora <a>EPEL 7</a>.</p>
+<p><a name="report6"></a></p>
+<h3>Show all members of a given meta device</h3>
+<pre><code>symdev -sid $SID show $DEV -out xml_e \
+   | xmllint --format --xpath \
+   ".//Device/Dev_Info[dev_name='$DEV']/../Meta/Meta_Device/dev_name" -
+</code></pre>
+<p><img src="assets/ss_xml_meta_memberlist.png" alt="screenshot" /></p>
+<p><a name="report7"></a></p>
+<h3>Show all IGs with visibility to a given device</h3>
+<pre><code>symaccess -sid $SID list devinfo -out xml_e \
+   | xmllint --format --xpath \
+   ".//Initiator_Group/Group_Info/Device[dev_name='$DEV']/../group_name" -
+</code></pre>
+<p><img src="assets/ss_xml_ig_visibility.png" alt="screenshot" /></p>
+<p><a name="report8"></a></p>
+<h3>Show all SGs containing a given device</h3>
+<pre><code>symsg -sid $SID list -v -output xml_e \
+   | xmllint --format --xpath \
+   ".//SG/DEVS_List/Device[dev_name='$DEV']/../../SG_Info/name" -
+</code></pre>
+<p><img src="assets/ss_xml_sg_membership.png" alt="screenshot" /></p>

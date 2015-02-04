@@ -1,0 +1,99 @@
+---
+layout: post
+title: Unisphere for VMAX REST API
+date: 2013-12-14 17:02:54.000000000 -05:00
+categories:
+- Automation
+tags: []
+status: publish
+type: post
+published: true
+meta:
+  _edit_last: '1'
+  _post_restored_from: a:3:{s:20:"restored_revision_id";i:13;s:16:"restored_by_user";i:1;s:13:"restored_time";i:1387201809;}
+author:
+  login: scummins
+  email: sean@scummins.com
+  display_name: Sean Cummins
+  first_name: Sean
+  last_name: Cummins
+---
+<p>This post will show you how to programmatically retrieve diagnostic performance data from the Unisphere for VMAX REST API. The official documentation for the REST API is in the <a title="Unisphere for VMAX REST API Programmer's Guide" href="https://support.emc.com/docu47002_Unisphere-for-VMAX-1.6-REST-API-Programmer's-Guide.pdf?language=en_US" target="_blank">Unisphere for VMAX REST API Programmer's Guide</a>, but as an infrastructure guy, I found this document difficult to interpret.</p>
+<p>One simple way to access it is via the <a href="https://addons.mozilla.org/en-US/firefox/addon/restclient/" target="_blank">Mozilla RESTClient</a>; a Firefox add-on. Once you've installed the add-on, you can import <a href="http://blog.scummins.com/files/RESTClient_Favorite_RESTAPI_Queries_v1.json" target="_blank">this</a> JSON "favorites" file, and it will load a bunch of queries into your RESTClient. You'll need to modify the IP address, authentication information, and Symm serial number to point to your instance of Unisphere for VMAX.</p>
+<p>And of course you can modify the queries to pull different metrics from various object categories. You can find the list of available categories and metrics in the schema, which can be downloaded from the Uni4VMAX instance. Just point your browser to <span style="text-decoration: underline;">https://&lt;unisphere_IP_address&gt;:8443/univmax/restapi</span>, and it will pull down a zip file. In that zip you'll find a file called "performance.xsd" with the schema info.</p>
+<p>Here's some info on how to interpret the contents of this file.</p>
+<p>For every "class" of component (e.g. Array, FEDirector, BEDirector, Disk, Storage Group, etc), you'll see two sections within the file. The sections are identified by comment fields. One section is for the "Keys" of that particular component type, and another section is for the "Metrics" of that component type.</p>
+<p>The Keys let you enumerate the component ID's that actually exist (e.g. You can get a list of all the FE directors in a particular Symmetrix), and the Metrics let you pull specific performance metrics for a given object (e.g. You can pull the "IO_RATE" for FA-7E).</p>
+<p>You can make calls to the API using XML or JSON. I think JSON is simpler and more readable, so that's what I primarily used.</p>
+<p>Here's what the FEDirector Keys section of the schema looks like. The only required parameter here (defined in the ParamType section) is the symmetrixId. You have to specify the full SymmID with leading zeros, and without any factory letter designations like "HK" or "CK" — basically the same format that you'd see in a "symcfg list".</p>
+<p><a href="http://blog.scummins.com/wp-content/uploads/2013/12/u4v_rest_fakeys.png"><img class="alignnone size-full wp-image-49" alt="u4v_rest_fakeys" src="assets/u4v_rest_fakeys.png" width="613" height="476" /></a></p>
+<p>In this case, you need to issue a POST to the URL <span style="text-decoration: underline;">https://&lt;IPAddr&gt;:8443/univmax/restapi/performance/FEDirector/keys</span>.</p>
+<p>The headers for your post need to include the following (the garbage string for authentication is just "smc:smc" encoded in <a href="http://www.base64encode.org/">Base64</a> — your client will typically do this encoding for you):</p>
+<ul>
+<li><strong>Authorization</strong>: Basic c21jOnNtYw==</li>
+<li><strong>Content-Type</strong>: application/json</li>
+<li><strong>Accept</strong>: application/json</li>
+</ul>
+<p>And the body of your POST should look like this (modify the SymmID as necessary):</p>
+<pre lang="javascript">{
+	"feDirectorKeyParam":{
+		"symmetrixId" : "000195700235"
+    }
+}</pre>
+<p>&nbsp;</p>
+<p>When you execute this POST, you should get back something like this… a list of all the FA's in this Symmetrix. Note that you also get "firstAvailable" and "lastAvailable" timestamps (in '<a href="http://www.epochconverter.com/">milliseconds from epoch</a>' format) -- this shows the time range of performance data that is available for that object. You'll need to specify a time range when you pull metrics in the next step.</p>
+<pre lang="javascript">{
+	"feDirectorKeyResult": {
+		"feDirectorInfo": [
+		{
+			"directorId": "FA-5E",
+			"firstAvailableDate": 1385586600000,
+			"lastAvailableDate": 1386192000000
+		},
+		{
+			"directorId": "FA-6E",
+			"firstAvailableDate": 1385586600000,
+			"lastAvailableDate": 1386192000000
+		},</pre>
+<p>&lt;… etc …&gt;</p>
+<p>&nbsp;</p>
+<p>Now that you know what FA's exist, you can pull metrics from one of them. To do this, examine the schema again, but this time look at the FEDirector Metrics section.</p>
+<p><a href="http://blog.scummins.com/wp-content/uploads/2013/12/u4v_rest_fametrics.png"><img class="alignnone size-full wp-image-50" alt="u4v_rest_fametrics" src="assets/u4v_rest_fametrics.png" width="686" height="283" /></a></p>
+<p><a href="http://blog.scummins.com/wp-content/uploads/2013/12/u4v_rest_fakeyparams.png"><img class="alignnone size-full wp-image-48" alt="u4v_rest_fakeyparams" src="assets/u4v_rest_fakeyparams.png" width="706" height="254" /></a></p>
+<p>&nbsp;</p>
+<p>So say we want to pull all of the IO_RATE values for FA-7E. Again you'll issue a POST to do this.</p>
+<p>The headers are the same as before.</p>
+<p>The URL changes to <span style="text-decoration: underline;">https://&lt;IPAddr&gt;:8443/univmax/restapi/performance/FEDirector/metrics</span>.</p>
+<p>And the body becomes:</p>
+<pre lang="javascript">{
+	"feDirectorParam":{
+		"startDate" : "1385586600000",
+		"endDate" : "1386192000000",
+		"symmetrixId" : "000195700235",
+		"directorId" : "FA-7E",
+		"metrics" : ["IO_RATE"]
+	}
+}</pre>
+<p>&nbsp;</p>
+<p>You should get back something like this… an entry for each time interval within the start/end range you specified, showing the value for the metric you specified. You can request multiple metrics at once by separating them with a comma within the square brackets — e.g. ["IO_RATE","READS","WRITES"].</p>
+<pre lang="javascript">{
+	"iterator": {
+		"resultList": {
+			"result": [
+				{
+					"IO_RATE": 0,
+					"timestamp": 1386006300000
+				},
+				{
+					"IO_RATE": 0,
+					"timestamp": 1386006600000
+				},</pre>
+<p>&lt;… etc …&gt;</p>
+<p>&nbsp;</p>
+<p>These requests can be issued with pretty much any client that can issue an HTTP POST… I think the Mozilla RESTClient is a simple way to demonstrate/explore the API, but you could also use things like Python or curl.</p>
+<p>Here's an example of a request for all FA Keys using the Mozilla RESTClient --</p>
+<p><a href="http://ceres.scummins.com/wp-content/uploads/2013/12/ss3.5.png"><img class="alignnone size-full wp-image-7" alt="ss3.5" src="assets/ss3.5.png" width="958" height="829" /></a></p>
+<p>&nbsp;</p>
+<p>Finally, here's that same request using curl. The output isn't pretty, but it works --</p>
+<p><a href="http://ceres.scummins.com/wp-content/uploads/2013/12/ss4.png"><img class="alignnone size-full wp-image-9" alt="ss4" src="assets/ss4.png" width="1036" height="675" /></a></p>
+<p>&nbsp;</p>
