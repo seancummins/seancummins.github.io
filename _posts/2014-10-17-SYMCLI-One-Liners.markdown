@@ -23,7 +23,7 @@ author:
 
 This post is simply a collection of UNIX/Linux shell one-liners for SYMCLI. Well, I guess they're not all one-liners, but they're all pretty brief -- to be pasted into a shell rather than executed from a file. I'll often share individual code snippets with people on an ad hoc basis, but I figured it would be more useful to just share everything in one post.
 
-I typically run these in [SYMCLI offline mode](http://blog.scummins.com/?p=56) from a CentOS-based Docker container running in an Ubuntu VM, which in turn runs in VMware Fusion on my Mac. If there's any interest, I can put together a post with some info on the whole 'Dockerized Solutions Enabler' thing (all of this is totally unsupported, BTW -- hence the 'offline mode' bit).
+I typically run these in [SYMCLI offline mode]({{ site.url }}/offline-symcli-commands/) from a CentOS-based Docker container running in an Ubuntu VM, which in turn runs in VMware Fusion on my Mac. If there's any interest, I can put together a post with some info on the whole 'Dockerized Solutions Enabler' thing (all of this is totally unsupported, BTW -- hence the 'offline mode' bit).
 
 These examples use environment variables in place of specific object names, so you can either set your environment variables accordingly and then copy/paste the code, or you can manually replace the variables with explicit object names.
 
@@ -209,7 +209,7 @@ diff <(symdev -sid $SID list -fast | grep TDEV | awk {'print $1'} \
 
 
 # XML One-Liners
-The examples in this section all use [SYMCLI's XML output](http://blog.scummins.com/?p=68). All code snippets require xmllint, which is included in the libxml2 package. It's probably already installed by default on your Linux distro; but if not, you can run `sudo [yum/zypper] install libxml2` to install it.
+The examples in this section all use [SYMCLI's XML output]({{ site.url }}/parsing-symclis-xml-output-with-python/). All code snippets require xmllint, which is included in the libxml2 package. It's probably already installed by default on your Linux distro; but if not, you can run `sudo [yum/zypper] install libxml2` to install it.
 
 One annoying aspect about xmllint is the way it formats its output (wonky delimeters, which you could fix up with sed). A better alternative (IMHO) is [xmlstarlet](http://xmlstar.sourceforge.net), but this is not installed by default on most Linux distros, and appears to have been dropped from Fedora [EPEL 7]().
 

@@ -38,7 +38,7 @@ Ok, I get it; it's not for production. So what's the point then?
 I can think of a few good use cases:
 
 * Provides a safe "read-only" development sandbox for creating custom reports in environments with multiple generations of Symmetrix systems.
-* You're in an EMC or Partner pre-sales, post-sales, or support role, and you work with Symmetrix systems on a regular basis. [Offline SYMCLI](http://blog.scummins.com/?p=56) is a very useful for people who help other organizations install, manage, and support their VMAX arrays.
+* You're in an EMC or Partner pre-sales, post-sales, or support role, and you work with Symmetrix systems on a regular basis. [Offline SYMCLI]({{ site.url }}/offline-symcli-commands/) is a very useful for people who help other organizations install, manage, and support their VMAX arrays.
 * You work with Symmetrix systems on a regular basis, and you want to learn more about shiny new stuff like [Docker](https://docker.com/) and [Vagrant](https://www.vagrantup.com).
 
 # Where can I get it?

@@ -1,7 +1,6 @@
 ---
 layout: page
 title: About Sean
-permalink: /about/
 date: 2013-12-16 15:24:07.000000000 -05:00
 categories: []
 tags: []
@@ -22,6 +21,10 @@ Sean is a pre-sales Principal Systems Engineer with EMC’s Core Technology Divi
 
 Sean lives in the Philadelphia area with his wife and three kids.
 
-![sean]({{ site.url }}/assets/sean530_11122014_med-300x200.jpeg)
+![sean]({{ site.url }}/sean530_11122014_med.jpeg)
 
-EMC Community Network: [community.emc.com/people/seancummins](http://community.emc.com/people/seancummins)
+LinkedIn: www.linkedin.com/in/scummins
+
+Twitter: twitter.com/scummins
+
+EMC Community Network: community.emc.com/people/seancummins
