@@ -6,6 +6,7 @@ date: 2014-02-06 17:11:00.000000000 -05:00
 categories: []
 tags: []
 status: publish
+comments: false
 type: page
 published: true
 meta:
