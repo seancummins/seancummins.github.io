@@ -5,6 +5,7 @@ date: 2014-01-20 23:13:11.000000000 -05:00
 categories: []
 tags: []
 status: publish
+comments: true
 type: post
 published: true
 meta:
