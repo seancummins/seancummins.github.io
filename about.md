@@ -6,6 +6,7 @@ date: 2013-12-16 15:24:07.000000000 -05:00
 categories: []
 tags: []
 status: publish
+comments: true
 type: page
 published: true
 meta:
