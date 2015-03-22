@@ -15,7 +15,9 @@ author:
   last_name: Cummins
 ---
 
-So I finally bit the bullet, and I've migrated this blog from Wordpress on AWS to Jekyll and Disqus on Github Pages. Because that's what all the cool kids are doing. Actually, my reasoning was twofold:
+So I finally bit the bullet, and I've migrated this blog from Wordpress on AWS to Jekyll and Disqus on Github Pages. Because that's what all the cool kids are doing.
+
+Actually, my reasoning was twofold:
 
 1. I'm a cheapskate.
 2. I wanted more git in my life.
