@@ -36,6 +36,11 @@ CloudFlare also provides three free HTTP 301 redirects. I used two for my most-v
 
 ![]({{ site.url }}/assets/Page_Rules_for_scummins_com_CloudFlare.png)
 
+And the flow of events end up looking something like this:
+
+![]({{ site.url }}/assets/CloudFlare_blog_UML.png)
+
+
 As a bonus, CloudFlare is also provides a bunch of other services, like caching/acceleration/compression via its content delivery network; analytics; and threat management. It will even cache & serve your static content in the event that your services are down. These services are offered free of charge, and there are paid plans with additional features and scalability limits.
 
 There are definitely other DNS providers out there with similar 301 rediction services and CNAME-flattening-equivalent services -- for example, [DNS Made Easy](http://help.dnsmadeeasy.com/managed-dns/records/http-redirection-record/), [easyDNS](http://helpwiki.easydns.com/index.php/URL_Forwarding), and even [Dyn](https://help.dyn.com/setting-up-http-redirect/) -- but I don't know of any other free ones. ;)
