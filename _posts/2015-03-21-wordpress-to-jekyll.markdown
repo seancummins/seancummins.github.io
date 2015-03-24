@@ -24,6 +24,8 @@ Actually, my reasoning was twofold:
 
 My final solution ended up being free (gratis & libre), and deployment is managed entirely via git.
 
+asdf
+
 I haven't exactly been prolific in my blog posting, so the migration was, for the most part, pretty straightforward. There are a million posts out there that discuss making the switch, so I won't reiterate all that here. The one topic I couldn't find much information on, though, was how to handle URL redirection in the event that your Wordpress install retained the [default](http://www.elegantthemes.com/blog/tips-tricks/wordpress-permalinks) Wordpress URL scheme (where all posts appear as `<baseurl>/?p=<postid>`).
 
 Github pages is able to perform some basic redirection, but it works by explicitly mapping old page URLs to new page URLs. With the default Wordpress URL scheme, there is essentially only one page (the implicit index.php page), and the `?p=<postid>` portions of the URL are query strings -- key/value pairs that are being passed into index.php. Github Pages [doesn't support](https://github.com/jekyll/jekyll-redirect-from/issues/28) redirection based on query strings, so I began searching for options that would allow me to migrate to Github Pages without breaking my old links.
