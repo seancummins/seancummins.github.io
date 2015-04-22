@@ -3,10 +3,10 @@ layout: post
 title: Containerization vis-à-vis Virtualization
 date: 2015-4-22 17:02:54.000000000 -05:00
 tags: []
-status: publish
+status: draft
 comments: true
 type: post
-published: true
+published: false
 author:
   login: scummins
   email: sean@scummins.com
