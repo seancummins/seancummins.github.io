@@ -55,7 +55,7 @@ Containers aim to solve this problem.
 Consider the analogy of transporting physical goods. Prior to the development of shipping containers, this was a logistical nightmare. At the transport layer, there were (and are) multiple modes of transportation -- cars, trucks, busses, cranes, etc. But the material to be transported varied wildly. Fitting a particular set of widgets into a given transport mechanism was Tetris gone amok.
 
 
-![](http://image.slidesharecdn.com/why-docker-website-130719212914-phpapp01-140801194952-phpapp02/95/docker-containers-and-the-future-of-application-delivery-13-638.jpg?cb=1407114615)
+![]({{ site.url }}/assets/containers/docker-containers-and-the-future-of-application-delivery-13-638.jpg)
 
 Enter shipping containers: an international standard for containerizing "stuff" to be transported from one place to another. The producers of said stuff just need to fit it into the container, and the transporters just need to ship the container, with no concern about its contents. Now the Tetris game consists entirely of those long rectangular pieces (they're apparently called "Straight Polyominos," in case you were wondering).
 
